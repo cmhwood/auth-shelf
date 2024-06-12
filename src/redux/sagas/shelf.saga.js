@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { put, takeEvery } from 'redux-saga/effects';
 
 // saga to get shelf items
 function* fetchShelf() {
@@ -23,7 +24,10 @@ function* deleteItem(action) {
 // saga to add shelf items
 function* addItem(action) {
   try {
-    yield axios.post('/api/shelf', action.payload);
+    yield axios.post('/api/shelf', {
+      description: action.payload.description,
+      image_url: action.payload.image_url,
+    });
     yield put({ type: 'FETCH_SHELF' });
   } catch (error) {
     console.error(`Error adding new item`);
@@ -33,6 +37,7 @@ function* addItem(action) {
 function* shelfSaga() {
   yield takeEvery('DELETE_ITEM', deleteItem);
   yield takeEvery('ADD_ITEM', addItem);
+  yield takeEvery('FETCH_SHELF', fetchShelf);
 }
 
 export default shelfSaga;
