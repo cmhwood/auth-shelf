@@ -6,4 +6,4 @@ const shelfReducer = (state = [], action) => {
   }
 };
 
-export default shelf;
+export default shelfReducer;

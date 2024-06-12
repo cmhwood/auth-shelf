@@ -27,8 +27,8 @@ router.post('/', rejectUnauthenticated, async (req, res) => {
   console.log('In post item');
   try {
     const result = await pool.query(
-      `INSERT INTO "item" ("description", "user_id", "image_url") VALUES ($1, $2, $3) RETURNING *;`,
-      [req.body.description, req.user.id, req.body.image_url]
+      `INSERT INTO "item" ("description", "image_url", "user_id" ) VALUES ($1, $2, $3) RETURNING *;`,
+      [req.body.description, req.body.image_url, req.user.id]
     );
     res.send(result.rows[0]);
   } catch (err) {
@@ -41,11 +41,14 @@ router.post('/', rejectUnauthenticated, async (req, res) => {
  * Delete an item if it's something the logged in user added
  */
 router.delete('/:id', rejectUnauthenticated, (req, res) => {
-  console.log('check req.user.id', req.user.id);
   // endpoint functionality
-  const queryText = `DELETE FROM "item" WHERE "user_id"=$1;`;
+  const queryText = `
+  DELETE FROM item
+  WHERE item.id = $1
+  AND item.user_id = $2;
+  `;
   pool
-    .query(queryText, [req.user.id])
+    .query(queryText, [req.params.id, req.user.id]) // $1, $2
     .then(() => {
       res.sendStatus(201);
     })
@@ -58,8 +61,21 @@ router.delete('/:id', rejectUnauthenticated, (req, res) => {
 /**
  * Update an item if it's something the logged in user added
  */
-router.put('/:id', (req, res) => {
-  // endpoint functionality
+router.put('/:id', rejectUnauthenticated, (req, res) => {
+  const queryText = `
+  UPDATE item
+  WHERE item.id = $1
+  AND item.user_id = $2;
+  `;
+  pool
+  .query(queryText, [req.params.id, req.user.id])
+  .then(() => {
+    res.sendStatus(201)
+  })
+  .catch((error) => {
+    console.log('error updating item', error);
+    res.sendStatus(500);
+  })
 });
 
 /**

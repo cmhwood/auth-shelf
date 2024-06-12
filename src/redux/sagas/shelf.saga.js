@@ -15,7 +15,7 @@ function* fetchShelf() {
 function* deleteItem(action) {
   try {
     yield axios.delete(`api/shelf/${action.payload}`);
-    yield put({ type: 'SET_SHELF' });
+    yield put({ type: 'FETCH_SHELF' });
   } catch {
     console.log('error deleting item', error);
   }
